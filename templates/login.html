@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — Wolf Energy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Sans:wght@700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.1/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #1A2B1C;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      justify-content: center;
+    }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: #2E8B3A;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700; font-size: 1.3rem;
+      color: #fff;
+    }
+    .logo-words .name {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700; font-size: 1rem;
+      color: #1A1F1B;
+    }
+    .logo-words .sub {
+      font-size: 0.75rem;
+      color: #3AA348;
+    }
+    h2 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.2rem;
+      color: #1A1F1B;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 0.82rem;
+      color: #8A9E8D;
+      margin-bottom: 24px;
+    }
+    label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #8A9E8D;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #CBD5CC;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      margin-bottom: 16px;
+      transition: border-color 0.15s;
+    }
+    input:focus { border-color: #2E8B3A; box-shadow: 0 0 0 3px rgba(46,139,58,0.1); }
+    button {
+      width: 100%;
+      padding: 11px;
+      background: #2E8B3A;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    button:hover { background: #1E6B28; }
+    .alert {
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: 0.82rem;
+      background: #FFEBEE;
+      border: 1px solid #EF9A9A;
+      color: #C62828;
+      display: flex; align-items: center; gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="logo">
+      <div class="logo-mark">W</div>
+      <div class="logo-words">
+        <div class="name">Wolf Energy</div>
+        <div class="sub">Consulting</div>
+      </div>
+    </div>
+    <h2>Connexion</h2>
+    <p class="subtitle">Accès réservé aux utilisateurs autorisés</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="alert">
+          <i class="bi bi-exclamation-triangle-fill"></i> {{ msg }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+      <label>Nom d'utilisateur</label>
+      <input name="username" type="text" placeholder="admin" required autofocus>
+      <label>Mot de passe</label>
+      <input name="password" type="password" placeholder="••••••••" required>
+      <button type="submit">
+        <i class="bi bi-box-arrow-in-right"></i> Se connecter
+      </button>
+    </form>
+  </div>
+</body>
+</html>

@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from datetime import date, datetime
 import os
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()
 
@@ -12,6 +14,19 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "wolf-energy-secret")
 
 db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = "login"
+login_manager.login_message = "Veuillez vous connecter pour accéder à cette page."
+
+class User(UserMixin, db.Model):
+    __tablename__ = "users"
+    id       = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 # ─────────────────────────────────────────────
 # MODÈLES (miroirs des tables PostgreSQL)
@@ -132,8 +147,40 @@ class Facture(db.Model):
 # ─────────────────────────────────────────────
 # ROUTES
 # ─────────────────────────────────────────────
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for("dashboard"))
+        flash("Identifiants incorrects.", "danger")
+    return render_template("login.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("login"))
+
+@app.route("/init-admin")
+def init_admin():
+    if User.query.first():
+        return "Administrateur déjà créé."
+    with app.app_context():
+        db.create_all()
+        user = User(
+            username="admin",
+            password=generate_password_hash("wolf2026")
+        )
+        db.session.add(user)
+        db.session.commit()
+    return "Administrateur créé ! Login: admin / Mot de passe: wolf2026"
 
 @app.route("/")
+@login_required
 def dashboard():
     nb_clients    = Client.query.filter_by(actif=True).count()
     nb_biens      = Bien.query.filter_by(actif=True).count()
@@ -154,11 +201,13 @@ def dashboard():
 # ── CLIENTS ──────────────────────────────────
 
 @app.route("/clients")
+@login_required
 def clients_liste():
     clients = Client.query.filter_by(actif=True).order_by(Client.nom).all()
     return render_template("clients.html", clients=clients)
 
 @app.route("/clients/nouveau", methods=["GET","POST"])
+@login_required
 def client_nouveau():
     if request.method == "POST":
         c = Client(
@@ -179,6 +228,7 @@ def client_nouveau():
     return render_template("client_form.html", client=None, titre="Nouveau client")
 
 @app.route("/clients/<int:id>/modifier", methods=["GET","POST"])
+@login_required
 def client_modifier(id):
     c = Client.query.get_or_404(id)
     if request.method == "POST":
@@ -197,6 +247,7 @@ def client_modifier(id):
     return render_template("client_form.html", client=c, titre="Modifier le client")
 
 @app.route("/clients/<int:id>/archiver")
+@login_required
 def client_archiver(id):
     c = Client.query.get_or_404(id)
     c.actif = False
@@ -207,11 +258,13 @@ def client_archiver(id):
 # ── BIENS ─────────────────────────────────────
 
 @app.route("/biens")
+@login_required
 def biens_liste():
     biens = Bien.query.filter_by(actif=True).order_by(Bien.reference_bien).all()
     return render_template("biens.html", biens=biens)
 
 @app.route("/biens/nouveau", methods=["GET","POST"])
+@login_required
 def bien_nouveau():
     clients = Client.query.filter_by(actif=True).order_by(Client.nom).all()
     if request.method == "POST":
@@ -237,6 +290,7 @@ def bien_nouveau():
     return render_template("bien_form.html", bien=None, clients=clients, titre="Nouveau bien")
 
 @app.route("/biens/<int:id>/modifier", methods=["GET","POST"])
+@login_required
 def bien_modifier(id):
     b = Bien.query.get_or_404(id)
     clients = Client.query.filter_by(actif=True).order_by(Client.nom).all()
@@ -262,11 +316,13 @@ def bien_modifier(id):
 # ── AUDITS ────────────────────────────────────
 
 @app.route("/audits")
+@login_required
 def audits_liste():
     audits = Audit.query.order_by(Audit.date_creation.desc()).all()
     return render_template("audits.html", audits=audits)
 
 @app.route("/audits/nouveau", methods=["GET","POST"])
+@login_required
 def audit_nouveau():
     clients = Client.query.filter_by(actif=True).order_by(Client.nom).all()
     biens   = Bien.query.filter_by(actif=True).order_by(Bien.reference_bien).all()
@@ -298,6 +354,7 @@ def audit_nouveau():
     return render_template("audit_form.html", audit=None, clients=clients, biens=biens, titre="Nouvel audit")
 
 @app.route("/audits/<int:id>/modifier", methods=["GET","POST"])
+@login_required
 def audit_modifier(id):
     a = Audit.query.get_or_404(id)
     clients = Client.query.filter_by(actif=True).order_by(Client.nom).all()
@@ -329,11 +386,13 @@ def audit_modifier(id):
 # ── DEVIS ─────────────────────────────────────
 
 @app.route("/devis")
+@login_required
 def devis_liste():
     devis = Devis.query.order_by(Devis.date_creation.desc()).all()
     return render_template("devis.html", devis=devis)
 
 @app.route("/devis/nouveau", methods=["GET","POST"])
+@login_required
 def devis_nouveau():
     clients = Client.query.filter_by(actif=True).order_by(Client.nom).all()
     audits  = Audit.query.order_by(Audit.reference_audit).all()
@@ -356,6 +415,7 @@ def devis_nouveau():
     return render_template("devis_form.html", devis=None, clients=clients, audits=audits, titre="Nouveau devis")
 
 @app.route("/devis/<int:id>/modifier", methods=["GET","POST"])
+@login_required
 def devis_modifier(id):
     d = Devis.query.get_or_404(id)
     clients = Client.query.filter_by(actif=True).order_by(Client.nom).all()
@@ -380,11 +440,13 @@ def devis_modifier(id):
 # ── FACTURES ──────────────────────────────────
 
 @app.route("/factures")
+@login_required
 def factures_liste():
     factures = Facture.query.order_by(Facture.date_creation.desc()).all()
     return render_template("factures.html", factures=factures)
 
 @app.route("/factures/nouvelle", methods=["GET","POST"])
+@login_required
 def facture_nouvelle():
     clients = Client.query.filter_by(actif=True).order_by(Client.nom).all()
     audits  = Audit.query.order_by(Audit.reference_audit).all()
@@ -415,6 +477,7 @@ def facture_nouvelle():
         clients=clients, audits=audits, devis=devis, titre="Nouvelle facture")
 
 @app.route("/factures/<int:id>/modifier", methods=["GET","POST"])
+@login_required
 def facture_modifier(id):
     f = Facture.query.get_or_404(id)
     clients = Client.query.filter_by(actif=True).order_by(Client.nom).all()
@@ -444,11 +507,13 @@ def facture_modifier(id):
 # ── DOCUMENTS ─────────────────────────────────
 
 @app.route("/documents")
+@login_required
 def documents_liste():
     documents = Document.query.order_by(Document.date_ajout.desc()).all()
     return render_template("documents.html", documents=documents)
 
 @app.route("/documents/nouveau", methods=["GET","POST"])
+@login_required
 def document_nouveau():
     audits  = Audit.query.order_by(Audit.reference_audit).all()
     clients = Client.query.filter_by(actif=True).order_by(Client.nom).all()

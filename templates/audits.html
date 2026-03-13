@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Audits — Wolf Energy{% endblock %}
+{% block page_title %}Audits{% endblock %}
+{% block content %}
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><i class="bi bi-clipboard2-data-fill"></i> {{ audits|length }} audit(s)</div>
+    <a href="{{ url_for('audit_nouveau') }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg"></i> Nouvel audit
+    </a>
+  </div>
+  {% if audits %}
+  <div class="table-wrap">
+    <table class="wolf-table">
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Client</th>
+          <th>Bien</th>
+          <th>Type</th>
+          <th>Statut</th>
+          <th>Visite</th>
+          <th>DPE</th>
+          <th>Gain</th>
+          <th>Montant HT</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in audits %}
+        {% set sc = {'Planifié':'bg-blue','En cours':'bg-orange','Rapport rédigé':'bg-teal','Livré':'bg-green','Archivé':'bg-gray','Annulé':'bg-red'} %}
+        <tr>
+          <td><span class="ref-tag">{{ a.reference_audit }}</span></td>
+          <td>{{ a.client.nom }}</td>
+          <td><span class="text-muted">{{ a.bien.reference_bien }}</span></td>
+          <td>{{ a.type_audit }}</td>
+          <td><span class="badge {{ sc.get(a.statut,'bg-gray') }}">{{ a.statut }}</span></td>
+          <td>{{ a.date_visite.strftime('%d/%m/%Y') if a.date_visite else '—' }}</td>
+          <td style="display:flex;gap:4px;align-items:center">
+            {% if a.classe_avant %}
+              <span class="dpe dpe-{{ a.classe_avant }}">{{ a.classe_avant }}</span>
+            {% else %}—{% endif %}
+            {% if a.classe_apres %}
+              <i class="bi bi-arrow-right" style="color:var(--txt-muted);font-size:0.7rem"></i>
+              <span class="dpe dpe-{{ a.classe_apres }}">{{ a.classe_apres }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if a.gain_energetique_pct %}
+              <span style="color:var(--wec-green);font-weight:600">{{ a.gain_energetique_pct }}%</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>{{ "%.2f €"|format(a.montant_ht) if a.montant_ht else '—' }}</td>
+          <td>
+            <a href="{{ url_for('audit_modifier', id=a.id_audit) }}" class="btn btn-ghost btn-sm">
+              <i class="bi bi-pencil-fill"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-clipboard2"></i>
+    <p>Aucun audit enregistré.</p>
+    <a href="{{ url_for('audit_nouveau') }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg"></i> Créer le premier audit
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

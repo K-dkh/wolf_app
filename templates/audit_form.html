@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}{{ titre }} — Wolf Energy{% endblock %}
+{% block page_title %}{{ titre }}{% endblock %}
+{% block content %}
+
+<div class="card" style="max-width:880px">
+  <div class="card-header">
+    <div class="card-title"><i class="bi bi-clipboard2-data-fill"></i> {{ titre }}</div>
+    <a href="{{ url_for('audits_liste') }}" class="btn btn-ghost btn-sm">
+      <i class="bi bi-arrow-left"></i> Retour
+    </a>
+  </div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="form-grid">
+
+        <p class="form-section">Identification du dossier</p>
+
+        <div class="form-group">
+          <label>Référence audit *</label>
+          <input name="reference_audit" class="form-control" required
+                 placeholder="AUD-2026-0001"
+                 value="{{ audit.reference_audit if audit }}">
+        </div>
+        <div class="form-group">
+          <label>Statut</label>
+          <select name="statut" class="form-control">
+            {% for s in ['Planifié','En cours','Rapport rédigé','Livré','Archivé','Annulé'] %}
+            <option value="{{ s }}"
+              {{ 'selected' if audit and audit.statut == s
+                 else ('selected' if not audit and s == 'En cours') }}>
+              {{ s }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Client *</label>
+          <select name="id_client" class="form-control" required>
+            <option value="">— Sélectionner —</option>
+            {% for c in clients %}
+            <option value="{{ c.id_client }}"
+              {{ 'selected' if audit and audit.id_client == c.id_client }}>
+              {{ c.nom }}{% if c.prenom %} {{ c.prenom }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Bien audité *</label>
+          <select name="id_bien" class="form-control" required>
+            <option value="">— Sélectionner —</option>
+            {% for b in biens %}
+            <option value="{{ b.id_bien }}"
+              {{ 'selected' if audit and audit.id_bien == b.id_bien }}>
+              {{ b.reference_bien }} — {{ b.adresse[:45] }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Type d'audit *</label>
+          <select name="type_audit" class="form-control" required>
+            {% for t in ['Audit réglementaire','Audit BBC','Audit copropriété',
+                         'Audit tertiaire','Pré-audit','Audit complet'] %}
+            <option value="{{ t }}" {{ 'selected' if audit and audit.type_audit == t }}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Auditeur</label>
+          <input name="auditeur" class="form-control"
+                 value="{{ audit.auditeur or '' if audit }}">
+        </div>
+        <div class="form-group">
+          <label>Date de visite</label>
+          <input name="date_visite" type="date" class="form-control"
+                 value="{{ audit.date_visite.strftime('%Y-%m-%d') if audit and audit.date_visite }}">
+        </div>
+        <div class="form-group">
+          <label>Date de livraison</label>
+          <input name="date_livraison" type="date" class="form-control"
+                 value="{{ audit.date_livraison.strftime('%Y-%m-%d') if audit and audit.date_livraison }}">
+        </div>
+
+        <p class="form-section">Résultats énergétiques</p>
+
+        <div class="form-group">
+          <label>Consommation avant (kWh/an)</label>
+          <input name="consommation_avant_kwh" type="number" step="0.01" class="form-control"
+                 value="{{ audit.consommation_avant_kwh or '' if audit }}">
+        </div>
+        <div class="form-group">
+          <label>Consommation après (kWh/an)</label>
+          <input name="consommation_apres_kwh" type="number" step="0.01" class="form-control"
+                 value="{{ audit.consommation_apres_kwh or '' if audit }}">
+        </div>
+        <div class="form-group">
+          <label>Gain énergétique (%)</label>
+          <input name="gain_energetique_pct" type="number" step="0.01" class="form-control"
+                 value="{{ audit.gain_energetique_pct or '' if audit }}">
+        </div>
+        <div class="form-group" style="display:flex;gap:14px">
+          <div style="flex:1">
+            <label>Classe DPE avant</label>
+            <select name="classe_avant" class="form-control">
+              <option value="">—</option>
+              {% for d in ['A','B','C','D','E','F','G'] %}
+              <option value="{{ d }}" {{ 'selected' if audit and audit.classe_avant == d }}>{{ d }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div style="flex:1">
+            <label>Classe DPE après</label>
+            <select name="classe_apres" class="form-control">
+              <option value="">—</option>
+              {% for d in ['A','B','C','D','E','F','G'] %}
+              <option value="{{ d }}" {{ 'selected' if audit and audit.classe_apres == d }}>{{ d }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <p class="form-section">Financier</p>
+
+        <div class="form-group">
+          <label>Montant HT (€)</label>
+          <input name="montant_ht" type="number" step="0.01" class="form-control"
+                 value="{{ audit.montant_ht or '' if audit }}">
+        </div>
+        <div class="form-group">
+          <label>Taux TVA (%)</label>
+          <input name="taux_tva" type="number" step="0.01" class="form-control"
+                 value="{{ audit.taux_tva or 20.00 if audit else 20.00 }}">
+        </div>
+
+        <p class="form-section">Textes</p>
+
+        <div class="form-group full">
+          <label>Recommandations</label>
+          <textarea name="recommandations" class="form-control" style="min-height:100px">{{ audit.recommandations or '' if audit }}</textarea>
+        </div>
+        <div class="form-group full">
+          <label>Observations</label>
+          <textarea name="observations" class="form-control">{{ audit.observations or '' if audit }}</textarea>
+        </div>
+        <div class="form-group full">
+          <label>Notes internes (non transmises au client)</label>
+          <textarea name="notes_internes" class="form-control">{{ audit.notes_internes or '' if audit }}</textarea>
+        </div>
+
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg"></i> Enregistrer
+        </button>
+        <a href="{{ url_for('audits_liste') }}" class="btn btn-ghost">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

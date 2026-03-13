@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord — Wolf Energy{% endblock %}
+{% block page_title %}Tableau de bord{% endblock %}
+{% block content %}
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon si-green"><i class="bi bi-people-fill"></i></div>
+    <div class="stat-val">{{ nb_clients }}</div>
+    <div class="stat-lbl">Clients actifs</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si-teal"><i class="bi bi-buildings-fill"></i></div>
+    <div class="stat-val">{{ nb_biens }}</div>
+    <div class="stat-lbl">Biens référencés</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si-green"><i class="bi bi-clipboard2-data-fill"></i></div>
+    <div class="stat-val">{{ nb_audits }}</div>
+    <div class="stat-lbl">Audits total</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si-orange"><i class="bi bi-hourglass-split"></i></div>
+    <div class="stat-val">{{ audits_cours }}</div>
+    <div class="stat-lbl">En cours</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si-blue"><i class="bi bi-file-earmark-text-fill"></i></div>
+    <div class="stat-val">{{ devis_envoyes }}</div>
+    <div class="stat-lbl">Devis en attente</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon si-teal"><i class="bi bi-cash-stack"></i></div>
+    <div class="stat-val" style="font-size:1.25rem">{{ "%.0f €"|format(encaisse) }}</div>
+    <div class="stat-lbl">Encaissé</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><i class="bi bi-clipboard2-data-fill"></i> Derniers audits</div>
+    <a href="{{ url_for('audit_nouveau') }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg"></i> Nouvel audit
+    </a>
+  </div>
+  {% if derniers_audits %}
+  <div class="table-wrap">
+    <table class="wolf-table">
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Client</th>
+          <th>Type</th>
+          <th>Statut</th>
+          <th>Visite</th>
+          <th>Montant HT</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in derniers_audits %}
+        {% set sc = {'Planifié':'bg-blue','En cours':'bg-orange','Rapport rédigé':'bg-teal','Livré':'bg-green','Archivé':'bg-gray','Annulé':'bg-red'} %}
+        <tr>
+          <td><span class="ref-tag">{{ a.reference_audit }}</span></td>
+          <td>{{ a.client.nom }}{% if a.client.prenom %} {{ a.client.prenom }}{% endif %}</td>
+          <td>{{ a.type_audit }}</td>
+          <td><span class="badge {{ sc.get(a.statut,'bg-gray') }}">{{ a.statut }}</span></td>
+          <td>{{ a.date_visite.strftime('%d/%m/%Y') if a.date_visite else '—' }}</td>
+          <td>{{ "%.2f €"|format(a.montant_ht) if a.montant_ht else '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-clipboard2"></i>
+    <p>Aucun audit pour le moment.</p>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><i class="bi bi-lightning-charge-fill"></i> Actions rapides</div>
+  </div>
+  <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap">
+    <a href="{{ url_for('client_nouveau') }}"   class="btn btn-outline btn-sm"><i class="bi bi-person-plus-fill"></i> Nouveau client</a>
+    <a href="{{ url_for('bien_nouveau') }}"     class="btn btn-outline btn-sm"><i class="bi bi-building-add"></i> Nouveau bien</a>
+    <a href="{{ url_for('audit_nouveau') }}"    class="btn btn-outline btn-sm"><i class="bi bi-clipboard-plus-fill"></i> Nouvel audit</a>
+    <a href="{{ url_for('devis_nouveau') }}"    class="btn btn-outline btn-sm"><i class="bi bi-file-earmark-plus-fill"></i> Nouveau devis</a>
+    <a href="{{ url_for('facture_nouvelle') }}" class="btn btn-outline btn-sm"><i class="bi bi-receipt"></i> Nouvelle facture</a>
+    <a href="{{ url_for('document_nouveau') }}" class="btn btn-outline btn-sm"><i class="bi bi-folder-plus-fill"></i> Ajouter document</a>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}{{ titre }} — Wolf Energy{% endblock %}
+{% block page_title %}{{ titre }}{% endblock %}
+{% block content %}
+
+<div class="card" style="max-width:700px">
+  <div class="card-header">
+    <div class="card-title"><i class="bi bi-person-fill"></i> {{ titre }}</div>
+    <a href="{{ url_for('clients_liste') }}" class="btn btn-ghost btn-sm">
+      <i class="bi bi-arrow-left"></i> Retour
+    </a>
+  </div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Type de client *</label>
+          <select name="type_client" class="form-control" required>
+            {% for t in ['Particulier','Entreprise','Copropriété','Collectivité'] %}
+            <option value="{{ t }}" {{ 'selected' if client and client.type_client == t }}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>SIRET</label>
+          <input name="siret" class="form-control" maxlength="14"
+                 placeholder="14 chiffres"
+                 value="{{ client.siret or '' if client }}">
+        </div>
+        <div class="form-group">
+          <label>Nom *</label>
+          <input name="nom" class="form-control" required
+                 value="{{ client.nom if client }}">
+        </div>
+        <div class="form-group">
+          <label>Prénom</label>
+          <input name="prenom" class="form-control"
+                 value="{{ client.prenom or '' if client }}">
+        </div>
+        <div class="form-group full">
+          <label>Raison sociale</label>
+          <input name="raison_sociale" class="form-control"
+                 value="{{ client.raison_sociale or '' if client }}">
+        </div>
+        <div class="form-group full">
+          <label>Adresse complète *</label>
+          <input name="adresse" class="form-control" required
+                 placeholder="12 rue des Lilas, 31000 Toulouse"
+                 value="{{ client.adresse if client }}">
+        </div>
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input name="telephone" class="form-control"
+                 value="{{ client.telephone or '' if client }}">
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input name="email" type="email" class="form-control" required
+                 value="{{ client.email if client }}">
+        </div>
+        <div class="form-group full">
+          <label>Notes</label>
+          <textarea name="notes" class="form-control">{{ client.notes or '' if client }}</textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg"></i> Enregistrer
+        </button>
+        <a href="{{ url_for('clients_liste') }}" class="btn btn-ghost">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

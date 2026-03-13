@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Documents — Wolf Energy{% endblock %}
+{% block page_title %}Documents{% endblock %}
+{% block content %}
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><i class="bi bi-folder-fill"></i> {{ documents|length }} document(s)</div>
+    <a href="{{ url_for('document_nouveau') }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg"></i> Ajouter
+    </a>
+  </div>
+  {% if documents %}
+  <div class="table-wrap">
+    <table class="wolf-table">
+      <thead>
+        <tr>
+          <th>Fichier</th>
+          <th>Type</th>
+          <th>Format</th>
+          <th>Lié à</th>
+          <th>Version</th>
+          <th>Date</th>
+          <th>Confidentiel</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in documents %}
+        <tr>
+          <td>
+            <strong>{{ d.nom_fichier }}</strong>
+            {% if d.description %}
+              <br><span class="text-muted">{{ d.description[:60] }}</span>
+            {% endif %}
+          </td>
+          <td><span class="badge bg-teal">{{ d.type_document }}</span></td>
+          <td>
+            {% if d.format_fichier %}
+              <span class="badge bg-gray">{{ d.format_fichier }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-muted">
+            {% if d.id_audit %}Audit {% endif %}
+            {% if d.id_client %}Client {% endif %}
+            {% if d.id_bien %}Bien{% endif %}
+          </td>
+          <td>{{ d.version or '—' }}</td>
+          <td>{{ d.date_ajout.strftime('%d/%m/%Y') }}</td>
+          <td>
+            {% if d.confidentiel %}
+              <span class="badge bg-red">Confidentiel</span>
+            {% else %}
+              <span class="badge bg-green">Non</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-folder2-open"></i>
+    <p>Aucun document.</p>
+    <a href="{{ url_for('document_nouveau') }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg"></i> Ajouter le premier document
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

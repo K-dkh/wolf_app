@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}{{ titre }} — Wolf Energy{% endblock %}
+{% block page_title %}{{ titre }}{% endblock %}
+{% block content %}
+
+<div class="card" style="max-width:780px">
+  <div class="card-header">
+    <div class="card-title"><i class="bi bi-buildings-fill"></i> {{ titre }}</div>
+    <a href="{{ url_for('biens_liste') }}" class="btn btn-ghost btn-sm">
+      <i class="bi bi-arrow-left"></i> Retour
+    </a>
+  </div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Client *</label>
+          <select name="id_client" class="form-control" required>
+            <option value="">— Sélectionner —</option>
+            {% for c in clients %}
+            <option value="{{ c.id_client }}"
+              {{ 'selected' if bien and bien.id_client == c.id_client }}>
+              {{ c.nom }}{% if c.prenom %} {{ c.prenom }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Référence bien *</label>
+          <input name="reference_bien" class="form-control" required
+                 placeholder="BIEN-2026-0001"
+                 value="{{ bien.reference_bien if bien }}">
+        </div>
+        <div class="form-group">
+          <label>Type de bien *</label>
+          <select name="type_bien" class="form-control" required>
+            {% for t in ['Maison individuelle','Appartement','Immeuble collectif',
+                         'Local commercial','Bureau','Entrepôt','Bâtiment industriel','Autre'] %}
+            <option value="{{ t }}" {{ 'selected' if bien and bien.type_bien == t }}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Surface (m²)</label>
+          <input name="surface_m2" type="number" step="0.01" class="form-control"
+                 value="{{ bien.surface_m2 or '' if bien }}">
+        </div>
+        <div class="form-group full">
+          <label>Adresse du bien *</label>
+          <input name="adresse" class="form-control" required
+                 value="{{ bien.adresse if bien }}">
+        </div>
+        <div class="form-group">
+          <label>Année de construction</label>
+          <input name="annee_construction" type="number" class="form-control"
+                 min="1800" max="2100"
+                 value="{{ bien.annee_construction or '' if bien }}">
+        </div>
+        <div class="form-group">
+          <label>Nombre de niveaux</label>
+          <input name="nb_niveaux" type="number" min="1" class="form-control"
+                 value="{{ bien.nb_niveaux or '' if bien }}">
+        </div>
+        <div class="form-group">
+          <label>Type de chauffage</label>
+          <input name="type_chauffage" class="form-control"
+                 placeholder="Gaz, Électrique, PAC…"
+                 value="{{ bien.type_chauffage or '' if bien }}">
+        </div>
+        <div class="form-group">
+          <label>Type de ventilation</label>
+          <input name="type_ventilation" class="form-control"
+                 placeholder="VMC SF, VMC DF…"
+                 value="{{ bien.type_ventilation or '' if bien }}">
+        </div>
+        <div class="form-group full">
+          <label>Type d'isolation</label>
+          <input name="type_isolation" class="form-control"
+                 value="{{ bien.type_isolation or '' if bien }}">
+        </div>
+        <div class="form-group">
+          <label>Classe DPE actuelle</label>
+          <select name="dpe_classe" class="form-control">
+            <option value="">— Non renseigné —</option>
+            {% for d in ['A','B','C','D','E','F','G'] %}
+            <option value="{{ d }}" {{ 'selected' if bien and bien.dpe_classe == d }}>{{ d }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Date du DPE</label>
+          <input name="dpe_date" type="date" class="form-control"
+                 value="{{ bien.dpe_date.strftime('%Y-%m-%d') if bien and bien.dpe_date }}">
+        </div>
+        <div class="form-group full">
+          <label>Notes</label>
+          <textarea name="notes" class="form-control">{{ bien.notes or '' if bien }}</textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg"></i> Enregistrer
+        </button>
+        <a href="{{ url_for('biens_liste') }}" class="btn btn-ghost">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Clients — Wolf Energy{% endblock %}
+{% block page_title %}Clients{% endblock %}
+{% block content %}
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><i class="bi bi-people-fill"></i> {{ clients|length }} client(s) actif(s)</div>
+    <a href="{{ url_for('client_nouveau') }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg"></i> Nouveau client
+    </a>
+  </div>
+  {% if clients %}
+  <div class="table-wrap">
+    <table class="wolf-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Nom</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Adresse</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in clients %}
+        {% set tc = {'Particulier':'bg-blue','Entreprise':'bg-green','Copropriété':'bg-orange','Collectivité':'bg-teal'} %}
+        <tr>
+          <td><span class="badge {{ tc.get(c.type_client,'bg-gray') }}">{{ c.type_client }}</span></td>
+          <td>
+            <strong>{{ c.nom }}{% if c.prenom %} {{ c.prenom }}{% endif %}</strong>
+            {% if c.raison_sociale %}<br><span class="text-muted">{{ c.raison_sociale }}</span>{% endif %}
+          </td>
+          <td>{{ c.email }}</td>
+          <td>{{ c.telephone or '—' }}</td>
+          <td style="max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+            {{ c.adresse }}
+          </td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <a href="{{ url_for('client_modifier', id=c.id_client) }}" class="btn btn-ghost btn-sm">
+                <i class="bi bi-pencil-fill"></i>
+              </a>
+              <a href="{{ url_for('client_archiver', id=c.id_client) }}" class="btn btn-danger-soft btn-sm"
+                 onclick="return confirm('Archiver ce client ?')">
+                <i class="bi bi-archive-fill"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-people"></i>
+    <p>Aucun client enregistré.</p>
+    <a href="{{ url_for('client_nouveau') }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg"></i> Créer le premier client
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

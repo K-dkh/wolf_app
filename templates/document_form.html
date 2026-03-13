@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}{{ titre }} — Wolf Energy{% endblock %}
+{% block page_title %}{{ titre }}{% endblock %}
+{% block content %}
+
+<div class="card" style="max-width:700px">
+  <div class="card-header">
+    <div class="card-title"><i class="bi bi-folder-plus-fill"></i> {{ titre }}</div>
+    <a href="{{ url_for('documents_liste') }}" class="btn btn-ghost btn-sm">
+      <i class="bi bi-arrow-left"></i> Retour
+    </a>
+  </div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Type de document *</label>
+          <select name="type_document" class="form-control" required>
+            {% for t in ["Rapport d'audit","Photo","Plan","Certificat",
+                         "Attestation DPE","Contrat","Autre"] %}
+            <option value="{{ t }}"
+              {{ 'selected' if document and document.type_document == t }}>
+              {{ t }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Format</label>
+          <select name="format_fichier" class="form-control">
+            <option value="">— Non renseigné —</option>
+            {% for f in ['PDF','JPG','PNG','DOCX','XLSX','DWG','IFC','AUTRE'] %}
+            <option value="{{ f }}"
+              {{ 'selected' if document and document.format_fichier == f }}>
+              {{ f }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nom du fichier *</label>
+          <input name="nom_fichier" class="form-control" required
+                 placeholder="rapport_audit.pdf"
+                 value="{{ document.nom_fichier if document }}">
+        </div>
+        <div class="form-group">
+          <label>Version</label>
+          <input name="version" class="form-control"
+                 value="{{ document.version or '1.0' if document else '1.0' }}">
+        </div>
+        <div class="form-group full">
+          <label>Chemin / URL du fichier *</label>
+          <input name="chemin_fichier" class="form-control" required
+                 placeholder="/documents/audits/rapport.pdf"
+                 value="{{ document.chemin_fichier if document }}">
+        </div>
+        <div class="form-group">
+          <label>Audit lié</label>
+          <select name="id_audit" class="form-control">
+            <option value="">— Aucun —</option>
+            {% for a in audits %}
+            <option value="{{ a.id_audit }}"
+              {{ 'selected' if document and document.id_audit == a.id_audit }}>
+              {{ a.reference_audit }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Client lié</label>
+          <select name="id_client" class="form-control">
+            <option value="">— Aucun —</option>
+            {% for c in clients %}
+            <option value="{{ c.id_client }}"
+              {{ 'selected' if document and document.id_client == c.id_client }}>
+              {{ c.nom }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Bien lié</label>
+          <select name="id_bien" class="form-control">
+            <option value="">— Aucun —</option>
+            {% for b in biens %}
+            <option value="{{ b.id_bien }}"
+              {{ 'selected' if document and document.id_bien == b.id_bien }}>
+              {{ b.reference_bien }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Ajouté par</label>
+          <input name="ajoute_par" class="form-control"
+                 value="{{ document.ajoute_par or '' if document }}">
+        </div>
+        <div class="form-group full">
+          <label>Description</label>
+          <textarea name="description" class="form-control">{{ document.description or '' if document }}</textarea>
+        </div>
+        <div class="form-group full">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;
+                        text-transform:none;letter-spacing:0">
+            <input type="checkbox" name="confidentiel"
+                   style="width:15px;height:15px;accent-color:var(--wec-green)"
+                   {{ 'checked' if document and document.confidentiel }}>
+            <span style="font-size:0.84rem;font-weight:500;color:var(--txt-main)">
+              Document confidentiel
+            </span>
+          </label>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg"></i> Enregistrer
+        </button>
+        <a href="{{ url_for('documents_liste') }}" class="btn btn-ghost">Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+```
+
+---
+
+**C'est tout !** Tu as maintenant les 8 fichiers complets. Pour rappel la structure à respecter :
+```
+wolf_energy/
+├── app.py
+├── requirements.txt        ← flask flask-sqlalchemy psycopg2-binary python-dotenv gunicorn
+├── .env                    ← DATABASE_URL=postgresql://postgres:MOT_DE_PASSE@localhost:5432/audit_energetique
+├── .gitignore
+└── templates/
+    ├── base.html
+    ├── dashboard.html
+    ├── clients.html / client_form.html
+    ├── biens.html / bien_form.html
+    ├── audits.html / audit_form.html
+    ├── devis.html / devis_form.html
+    ├── factures.html / facture_form.html
+    └── documents.html / document_form.html

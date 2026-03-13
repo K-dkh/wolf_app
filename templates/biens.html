@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Biens — Wolf Energy{% endblock %}
+{% block page_title %}Biens{% endblock %}
+{% block content %}
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><i class="bi bi-buildings-fill"></i> {{ biens|length }} bien(s)</div>
+    <a href="{{ url_for('bien_nouveau') }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg"></i> Nouveau bien
+    </a>
+  </div>
+  {% if biens %}
+  <div class="table-wrap">
+    <table class="wolf-table">
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Client</th>
+          <th>Type</th>
+          <th>Adresse</th>
+          <th>Surface</th>
+          <th>Année</th>
+          <th>DPE</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in biens %}
+        <tr>
+          <td><span class="ref-tag">{{ b.reference_bien }}</span></td>
+          <td>{{ b.client.nom }}</td>
+          <td><span class="badge bg-teal">{{ b.type_bien }}</span></td>
+          <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+            {{ b.adresse }}
+          </td>
+          <td>{{ b.surface_m2 or '—' }}{% if b.surface_m2 %} m²{% endif %}</td>
+          <td>{{ b.annee_construction or '—' }}</td>
+          <td>
+            {% if b.dpe_classe %}
+              <span class="dpe dpe-{{ b.dpe_classe }}">{{ b.dpe_classe }}</span>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            <a href="{{ url_for('bien_modifier', id=b.id_bien) }}" class="btn btn-ghost btn-sm">
+              <i class="bi bi-pencil-fill"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <i class="bi bi-buildings"></i>
+    <p>Aucun bien enregistré.</p>
+    <a href="{{ url_for('bien_nouveau') }}" class="btn btn-primary btn-sm">
+      <i class="bi bi-plus-lg"></i> Créer le premier bien
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

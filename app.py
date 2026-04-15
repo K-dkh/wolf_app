@@ -28,9 +28,9 @@ class User(UserMixin, db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# ─────────────────────────────────────────────
-# MODÈLES (miroirs des tables PostgreSQL)
-# ─────────────────────────────────────────────
+
+## MODÈLES (miroirs des tables PostgreSQL)
+
 
 class Client(db.Model):
     __tablename__ = "clients"
@@ -144,9 +144,9 @@ class Facture(db.Model):
     date_creation     = db.Column(db.DateTime, default=datetime.now)
     client            = db.relationship("Client", backref="factures")
 
-# ─────────────────────────────────────────────
+
 # ROUTES
-# ─────────────────────────────────────────────
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
